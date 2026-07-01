@@ -6,7 +6,20 @@ const panel = document.getElementById("gamePanel");
 const resultText = document.getElementById("resultText");
 const restartBtn = document.getElementById("restartBtn");
 
-const colors = ["#f45b69", "#39b7d1", "#ffd45a", "#70cf75", "#9569d9"];
+const ballTypes = [
+  { id: "ball1", src: "assets/balls/ball3_0_1.png", color: "#34495e" },
+  { id: "ball2", src: "assets/balls/ball3_0_2.png", color: "#6f5f99" },
+  { id: "ball3", src: "assets/balls/ball3_0_3.png", color: "#f0b184" },
+  { id: "ball4", src: "assets/balls/ball3_0_4.png", color: "#b88b45" },
+  { id: "ball5", src: "assets/balls/ball3_0_5.png", color: "#c45b42" },
+  { id: "ball6", src: "assets/balls/ball3_0_6.png", color: "#9a83e6" },
+  { id: "ball7", src: "assets/balls/ball3_0_7.png", color: "#7f96c8" },
+  { id: "ball8", src: "assets/balls/ball3_0_8.png", color: "#e7a061" },
+  { id: "ball9", src: "assets/balls/ball3_0_9.png", color: "#e96b7d" },
+  { id: "ball10", src: "assets/balls/ball3_0_10.png", color: "#efc84b" },
+  { id: "ball11", src: "assets/balls/ball3_0_11.png", color: "#9b78a8" }
+];
+const ballImages = new Map();
 let width = 0;
 let height = 0;
 let path = [];
@@ -27,12 +40,24 @@ const cannon = {
   x: 0,
   y: 0,
   angle: -Math.PI / 2,
-  current: randomColor(),
-  next: randomColor()
+  current: randomBallType(),
+  next: randomBallType()
 };
 
-function randomColor() {
-  return colors[Math.floor(Math.random() * colors.length)];
+function loadBallImages() {
+  for (const type of ballTypes) {
+    const image = new Image();
+    image.src = type.src;
+    ballImages.set(type.id, image);
+  }
+}
+
+function randomBallType() {
+  return ballTypes[Math.floor(Math.random() * ballTypes.length)].id;
+}
+
+function getBallType(id) {
+  return ballTypes.find(type => type.id === id) || ballTypes[0];
 }
 
 function resize() {
@@ -82,13 +107,13 @@ function init() {
   spawnDistance = 0;
   score = 0;
   gameState = "playing";
-  cannon.current = randomColor();
-  cannon.next = randomColor();
+  cannon.current = randomBallType();
+  cannon.next = randomBallType();
   panel.classList.add("hidden");
 
   for (let i = 0; i < 30; i++) {
     beads.push({
-      color: randomColor(),
+      color: randomBallType(),
       distance: -i * spacing,
       radius: beadRadius
     });
@@ -207,7 +232,7 @@ function shoot() {
     active: true
   });
   cannon.current = cannon.next;
-  cannon.next = randomColor();
+  cannon.next = randomBallType();
 }
 
 function swapBall() {
@@ -316,6 +341,7 @@ function startChainPull(gapIndex, chainLevel) {
 }
 
 function createParticles(x, y, color, count) {
+  const particleColor = getBallType(color).color;
   for (let i = 0; i < count; i++) {
     const angle = Math.random() * Math.PI * 2;
     const burst = 70 + Math.random() * 170;
@@ -327,7 +353,7 @@ function createParticles(x, y, color, count) {
       size: 2 + Math.random() * 3,
       life: 0.48,
       maxLife: 0.48,
-      color
+      color: particleColor
     });
   }
 }
@@ -423,19 +449,28 @@ function drawParticles() {
   ctx.globalAlpha = 1;
 }
 
-function drawBall(x, y, radius, color) {
-  ctx.fillStyle = color;
+function drawBall(x, y, radius, ballId) {
+  const type = getBallType(ballId);
+  const image = ballImages.get(ballId);
+
+  ctx.save();
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.clip();
 
-  ctx.fillStyle = "rgba(255,255,255,0.48)";
-  ctx.beginPath();
-  ctx.arc(x - radius * 0.32, y - radius * 0.35, radius * 0.32, 0, Math.PI * 2);
-  ctx.fill();
+  if (image && image.complete && image.naturalWidth > 0) {
+    ctx.drawImage(image, x - radius, y - radius, radius * 2, radius * 2);
+  } else {
+    ctx.fillStyle = type.color;
+    ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+  }
+
+  ctx.restore();
 
   ctx.strokeStyle = "rgba(46,34,25,0.18)";
   ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
   ctx.stroke();
 }
 
@@ -468,6 +503,7 @@ swapBtn.addEventListener("pointerdown", event => {
 restartBtn.addEventListener("click", init);
 window.addEventListener("resize", resize);
 
+loadBallImages();
 resize();
 init();
 requestAnimationFrame(loop);
