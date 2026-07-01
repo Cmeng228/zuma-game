@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>祖马消除小游戏</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <canvas id="gameCanvas" aria-label="祖马消除小游戏"></canvas>
+
+    <div class="hud">
+      <div class="score">分数 <span id="score">0</span></div>
+      <button id="swapBtn" type="button">切换</button>
+    </div>
+
+    <div id="gamePanel" class="panel hidden">
+      <div class="panel-content">
+        <h1 id="resultText">通关成功</h1>
+        <button id="restartBtn" type="button">再来一局</button>
+      </div>
+    </div>
+
+    <script src="./game.js"></script>
+  </body>
+</html>
