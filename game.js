@@ -34,7 +34,6 @@ let score = 0;
 let gameState = "playing";
 let lastTime = 0;
 let chainPull = null;
-let spawnDistance = 0;
 
 const cannon = {
   x: 0,
@@ -104,7 +103,6 @@ function init() {
   bullets = [];
   particles = [];
   chainPull = null;
-  spawnDistance = 0;
   score = 0;
   gameState = "playing";
   cannon.current = randomBallType();
@@ -154,13 +152,7 @@ function updateBeads(dt) {
 
   const contacts = [];
   const tail = beads.length - 1;
-  const chainLength = (beads.length - 1) * spacing;
-  const isEntrancePushing = spawnDistance <= chainLength;
-  spawnDistance += speed * dt;
-
-  if (isEntrancePushing) {
-    beads[tail].distance += speed * dt;
-  }
+  beads[tail].distance += speed * dt;
 
   for (let i = tail - 1; i >= 0; i--) {
     const gap = beads[i].distance - beads[i + 1].distance;
