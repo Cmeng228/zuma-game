@@ -118,8 +118,29 @@ function update(dt) {
 }
 
 function updateBeads(dt) {
-  for (const bead of beads) bead.distance += speed * dt;
   normalizeBeads();
+  if (!beads.length) return;
+
+  const contacts = [];
+  const tail = beads.length - 1;
+  beads[tail].distance += speed * dt;
+
+  for (let i = tail - 1; i >= 0; i--) {
+    const gap = beads[i].distance - beads[i + 1].distance;
+    if (gap <= spacing) {
+      beads[i].distance = beads[i + 1].distance + spacing;
+      contacts.push(i);
+    }
+  }
+
+  normalizeBeads();
+
+  for (const index of contacts) {
+    if (beads[index] && beads[index + 1] && beads[index].color === beads[index + 1].color) {
+      resolveMatches(index, 2);
+      break;
+    }
+  }
 }
 
 function normalizeBeads() {
