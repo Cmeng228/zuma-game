@@ -20,6 +20,7 @@ let speed = 20;
 let score = 0;
 let gameState = "playing";
 let lastTime = 0;
+let chainPull = null;
 
 const cannon = {
   x: 0,
@@ -76,6 +77,7 @@ function init() {
   beads = [];
   bullets = [];
   particles = [];
+  chainPull = null;
   score = 0;
   gameState = "playing";
   cannon.current = randomColor();
@@ -121,6 +123,8 @@ function updateBeads(dt) {
   normalizeBeads();
   if (!beads.length) return;
 
+  if (updateChainPull(dt)) return;
+
   const contacts = [];
   const tail = beads.length - 1;
   beads[tail].distance += speed * dt;
@@ -141,6 +145,38 @@ function updateBeads(dt) {
       break;
     }
   }
+}
+
+function updateChainPull(dt) {
+  if (!chainPull) return false;
+
+  const { frontIndex, backIndex, chainLevel } = chainPull;
+  const front = beads[frontIndex];
+  const back = beads[backIndex];
+
+  if (!front || !back || front.color !== back.color) {
+    chainPull = null;
+    return false;
+  }
+
+  const targetDistance = back.distance + spacing;
+  const gap = front.distance - targetDistance;
+
+  if (gap <= 0.5) {
+    front.distance = targetDistance;
+    normalizeBeads();
+    chainPull = null;
+    resolveMatches(frontIndex, chainLevel);
+    return true;
+  }
+
+  const pullSpeed = speed * 4.5;
+  const shift = Math.min(gap, pullSpeed * dt);
+  for (let i = 0; i <= frontIndex; i++) {
+    beads[i].distance -= shift;
+  }
+
+  return true;
 }
 
 function normalizeBeads() {
@@ -245,11 +281,30 @@ function resolveMatches(index, chainLevel) {
   score += removed * 10 * chainLevel;
   updateScore();
   normalizeBeads();
+  startChainPull(removeLeft, chainLevel + 1);
 
-  setTimeout(() => {
-    const nextIndex = Math.max(0, removeLeft - 1);
-    if (gameState === "playing" && beads[nextIndex]) resolveMatches(nextIndex, chainLevel + 1);
-  }, 130);
+  if (!chainPull) {
+    setTimeout(() => {
+      const nextIndex = Math.max(0, removeLeft - 1);
+      if (gameState === "playing" && beads[nextIndex]) resolveMatches(nextIndex, chainLevel + 1);
+    }, 130);
+  }
+}
+
+function startChainPull(gapIndex, chainLevel) {
+  const frontIndex = gapIndex - 1;
+  const backIndex = gapIndex;
+
+  if (
+    frontIndex >= 0 &&
+    backIndex < beads.length &&
+    beads[frontIndex].color === beads[backIndex].color &&
+    beads[frontIndex].distance - beads[backIndex].distance > spacing + 0.5
+  ) {
+    chainPull = { frontIndex, backIndex, chainLevel };
+  } else {
+    chainPull = null;
+  }
 }
 
 function createParticles(x, y, color, count) {
