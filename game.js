@@ -8,16 +8,10 @@ const restartBtn = document.getElementById("restartBtn");
 
 const ballTypes = [
   { id: "ball1", src: "assets/balls/ball3_0_1.png", color: "#34495e" },
-  { id: "ball2", src: "assets/balls/ball3_0_2.png", color: "#6f5f99" },
   { id: "ball3", src: "assets/balls/ball3_0_3.png", color: "#f0b184" },
-  { id: "ball4", src: "assets/balls/ball3_0_4.png", color: "#b88b45" },
-  { id: "ball5", src: "assets/balls/ball3_0_5.png", color: "#c45b42" },
   { id: "ball6", src: "assets/balls/ball3_0_6.png", color: "#9a83e6" },
-  { id: "ball7", src: "assets/balls/ball3_0_7.png", color: "#7f96c8" },
-  { id: "ball8", src: "assets/balls/ball3_0_8.png", color: "#e7a061" },
   { id: "ball9", src: "assets/balls/ball3_0_9.png", color: "#e96b7d" },
-  { id: "ball10", src: "assets/balls/ball3_0_10.png", color: "#efc84b" },
-  { id: "ball11", src: "assets/balls/ball3_0_11.png", color: "#9b78a8" }
+  { id: "ball10", src: "assets/balls/ball3_0_10.png", color: "#efc84b" }
 ];
 const ballImages = new Map();
 let width = 0;
